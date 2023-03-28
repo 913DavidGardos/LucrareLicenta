@@ -12,7 +12,7 @@ int main()
 	SetWindowState(FLAG_VSYNC_HINT);
 
 	ParticleManager pm(SCREEN_WIDTH, SCREEN_HEIGHT);
-	pm.InitParticles(100);
+	pm.InitParticles(20);
 
 	double previousTime = 0;
 	double currentTime = 0;
@@ -26,7 +26,7 @@ int main()
 		deltaT = deltaT * 10.f;
 
 		if (deltaT > 0.15f) deltaT = 0.15f;
-
+		
 		BeginDrawing();
 		ClearBackground(WHITE);
 		
