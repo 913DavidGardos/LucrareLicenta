@@ -10,7 +10,7 @@ class StaticQuadTree
 {
 public:
 	StaticQuadTree(const Rectangle& rectangle = { 0.f, 0.f, 100.f, 100.f }, const size_t depth = 0) :
-		 rectangle(rectangle), depth(depth)
+		 parent(this), rectangle(rectangle), depth(depth)
 	{
 		resize(rectangle);
 	}
@@ -67,6 +67,7 @@ public:
 					{
 						// No, make one
 						childPtr[i] = std::make_shared<StaticQuadTree<T>>(childRec[i], depth + 1);
+						childPtr[i]->parent = this;
 					}
 
 					childPtr[i]->insert(item, itemSize);
@@ -125,54 +126,8 @@ public:
 		}
 	}
 
-
-	void remove(const T& item, const Rectangle& itemSize)
-	{
-		for (int i = 0; i < 4; i++)
-		{
-			if (firstContainsSecond(childRec[i], itemSize))
-			{
-				// did we reach depth limit?
-				if (depth + 1 < maxDepth)
-				{
-					// does child exist?
-					if (childPtr[i])
-					{
-						childPtr[i]->remove(item, itemSize);
-						return;
-					}
-				}
-				else // at the leaf node
-				{
-					for (auto it = items.begin(); it != items.end(); ++it)
-					{
-						if (it->second == item)
-						{
-							items.erase(it);
-							if (items.empty())
-								clear();
-							return;
-						}
-					}
-				}
-			}
-		}
-	}
-
 	void traverse()
 	{
-		//DrawLine((rectangle.x + rectangle.width) / 2, 
-		//		rectangle.y,
-		//		(rectangle.x + rectangle.width) / 2,
-		//		(rectangle.y + rectangle.height), 
-		//		BLACK);
-
-		//DrawLine(rectangle.x, 
-		//		(rectangle.y + rectangle.height) / 2, 
-		//		(rectangle.x + rectangle.width),
-		//		(rectangle.y + rectangle.height) / 2,
-		//		BLACK);
-
 		DrawRectangleLines(rectangle.x, rectangle.y, rectangle.width, rectangle.height, GRAY);
 
 		for (int i = 0; i < 4; i++)
@@ -181,7 +136,6 @@ public:
 				childPtr[i]->traverse();
 		}
 	}
-
 
 protected:
 
@@ -195,6 +149,8 @@ protected:
 				childPtr[i]->retriveItems(listItems);
 	}
 
+	StaticQuadTree<T>* parent = nullptr;
+
 	size_t depth = 0;
 
 	Rectangle rectangle;
@@ -206,5 +162,5 @@ protected:
 	// container of the objects stored at this level
 	std::vector<std::pair<Rectangle, T>> items;
 
-	static const int maxDepth = 10;
+	static const int maxDepth = 8;
 };

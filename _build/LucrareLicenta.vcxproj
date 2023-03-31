@@ -254,6 +254,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\game\src\screens.h" />
+    <ClInclude Include="KDTree.h" />
+    <ClInclude Include="KDTreeContainer.h" />
     <ClInclude Include="Particle.h" />
     <ClInclude Include="ParticleInterface.h" />
     <ClInclude Include="ParticleInterface2D.h" />
