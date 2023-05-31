@@ -54,7 +54,6 @@ public:
 
 	void insert(const T& item, const Rectangle& itemSize)
 	{
-
 		for (int i = 0; i < 4; i++)
 		{
 			if (firstContainsSecond(childRec[i], itemSize))
@@ -137,6 +136,32 @@ public:
 		}
 	}
 
+	Rectangle getParentRec()
+	{
+		return parent->rectangle;
+	}
+
+	Rectangle getRec()
+	{
+		return rectangle;
+	}
+	
+	StaticQuadTree<T>* getParent()
+	{
+		return parent;
+	}
+
+	std::shared_ptr <StaticQuadTree<T>> getChildPtr(int i)
+	{
+		return childPtr[i];
+	}
+
+	std::vector<std::pair<Rectangle, T>> getItems()
+	{
+		return items;
+	}
+
+
 protected:
 
 	void retriveItems(std::list<T>& listItems) const
@@ -162,5 +187,5 @@ protected:
 	// container of the objects stored at this level
 	std::vector<std::pair<Rectangle, T>> items;
 
-	static const int maxDepth = 8;
+	static const int maxDepth = 7;
 };

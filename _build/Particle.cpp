@@ -63,7 +63,7 @@ Color Particle::getColor()
 
 Rectangle Particle::getRectangle()
 {
-	return Rectangle{position.x - radius, position.y - radius, radius * radius, radius * radius };
+	return Rectangle{position.x - radius, position.y - radius, 2 * radius, 2 * radius };
 }
 
 float Particle::getMass()

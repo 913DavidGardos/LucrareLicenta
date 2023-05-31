@@ -30,10 +30,10 @@
     <ClInclude Include="QuadTreeContainer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="KDTree.h">
+    <ClInclude Include="BvhContainer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="KDTreeContainer.h">
+    <ClInclude Include="GridContainer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -45,6 +45,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ParticleManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BvhContainer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GridContainer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

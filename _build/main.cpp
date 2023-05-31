@@ -3,8 +3,8 @@
 #include "ParticleManager.h"
 #include <vector>
 #include <chrono>
-#define SCREEN_WIDTH 1600
-#define SCREEN_HEIGHT 1000
+#define SCREEN_WIDTH 1920
+#define SCREEN_HEIGHT 1080
 
 int main()
 {
@@ -15,7 +15,7 @@ int main()
 
 	auto start_time = std::chrono::high_resolution_clock::now();
 
-	pm.InitParticles(10000);
+	pm.InitParticles(100);	
 
 	auto end_time = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
@@ -45,16 +45,17 @@ int main()
 			auto start_time = std::chrono::high_resolution_clock::now();
 
 			pm.drawParticles();
-
+			pm.updateParticles(deltaT);
 
 			auto end_time = std::chrono::high_resolution_clock::now();
 			auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
 
-			std::cout << "Execution time Draw 1000: " << duration.count() << " milliseconds" << std::endl;
+			//printf("Duration of update Particle %d \n", duration.count());
 		}
 
 		DrawFPS(10, 10);
 		EndDrawing();
+
 	}
 	 
 

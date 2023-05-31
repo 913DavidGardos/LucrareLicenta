@@ -3,10 +3,12 @@
 #include <raylib.h>
 #include "ParticleInterface.h"
 #include "Particle.h"
-#include "KDTreeContainer.h"
+#include "BvhContainer.h"
 #include <random>
 #include <memory>
+#include <utility>
 #include "QuadTreeContainer.h"
+#include "GridContainer.h"
 
 class ParticleManager
 {
@@ -20,25 +22,25 @@ public:
 
 private:
 	void generateParticle();
-
-	void solveCollisionWithFrame(std::list<Particle>::iterator it);
-
-	void circleElasticCollisionResolution(std::list<Particle>::iterator it, std::list<Particle>::iterator particle);
-
+	void solveCollisionWithFrame(Particle*);
+	void circleElasticCollisionResolution(Particle*, Particle*);
 	void drawWithQuadTree();
-
 	void updateWithQuadTree(float);
+	void drawWithBvh();
+	void updateWithBvh(float deltaT);
 
-	void drawWithKDTree();
+	void drawWithGrid();
 
-	void updateWithKDTree(float deltaT);
-
-	void resolveCollisionPulse(std::list<Particle>::iterator circle1, std::list<Particle>::iterator cirlce2);
+	void updateWithGrid(float deltaT);
 
 	int screenWidth, screenHeight;
-	std::list<std::shared_ptr<ParticleInterface>> particleList;
+
+	std::list<std::shared_ptr<ParticleInterface>> allParticles;
+	std::map<int, std::shared_ptr<Particle>> particleMap;
+
 	StaticQuadTreeContainer<Particle> quadTreeParticles;
-	KDTreeContainer<Particle> kdTreeContainer;
+	std::unique_ptr<BvhContainer> bvhContainer;
+	std::unique_ptr<GridContainer> gridContainer;
 
 	std::random_device randomDevice;
 	std::mt19937 randomGenerator;
