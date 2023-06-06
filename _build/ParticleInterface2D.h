@@ -14,4 +14,5 @@ public:
 	virtual void setPosition(const Vector2&) = 0;
 	virtual void setX(float x) = 0;
 	virtual void setY(float y) = 0;
+
 };

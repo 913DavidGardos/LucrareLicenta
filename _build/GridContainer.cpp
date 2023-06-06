@@ -1,5 +1,7 @@
 #include "GridContainer.h"
 
+/*
+
 GridContainer::GridContainer(int rows, int cols, int screenWidth, int screenHeight) : rows(rows), cols(cols)
 {
 	cellWidth = screenWidth / cols;
@@ -131,3 +133,6 @@ int GridContainer::getCols()
 {
 	return cols;
 }
+
+
+*/

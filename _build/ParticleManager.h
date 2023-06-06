@@ -39,8 +39,8 @@ private:
 	std::map<int, std::shared_ptr<Particle>> particleMap;
 
 	StaticQuadTreeContainer<Particle> quadTreeParticles;
-	std::unique_ptr<BvhContainer> bvhContainer;
-	std::unique_ptr<GridContainer> gridContainer;
+	std::unique_ptr<BvhContainer<Particle>> bvhContainer;
+	std::unique_ptr<GridContainer<Particle>> gridContainer;
 
 	std::random_device randomDevice;
 	std::mt19937 randomGenerator;

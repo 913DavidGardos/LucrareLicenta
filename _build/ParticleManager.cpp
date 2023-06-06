@@ -16,11 +16,10 @@ void ParticleManager::InitParticles(int numberOfParticles)
 	for (int i = 0; i < numberOfParticles; i++)
 		generateParticle();
 
-
-	bvhContainer = std::make_unique<BvhContainer>(particleMap);
+	bvhContainer = std::make_unique<BvhContainer<Particle>>(particleMap);
 	bvhContainer->buildBVH();
 
-	gridContainer = std::make_unique<GridContainer>(108, 192, screenWidth, screenHeight);
+	gridContainer = std::make_unique<GridContainer<Particle>>(108, 192, screenWidth, screenHeight);
 	for (auto elem : particleMap)
 	{
 		gridContainer->insert(elem.second->getId(), elem.second->getX(), elem.second->getY());
@@ -29,9 +28,9 @@ void ParticleManager::InitParticles(int numberOfParticles)
 
 void ParticleManager::drawParticles()
 {
-	drawWithQuadTree();
+	//drawWithQuadTree();
 	//drawWithBvh();
-	//drawWithGrid();
+	drawWithGrid();
 }
 
 const StaticQuadTreeContainer<Particle>& ParticleManager::getQuadTreeParticles()
@@ -41,9 +40,9 @@ const StaticQuadTreeContainer<Particle>& ParticleManager::getQuadTreeParticles()
 
 void ParticleManager::updateParticles(float deltaT)
 {
-	updateWithQuadTree(deltaT);
+	//updateWithQuadTree(deltaT);
 	//updateWithBvh(deltaT);
-	//updateWithGrid(deltaT);
+	updateWithGrid(deltaT);
 }
 
 void ParticleManager::generateParticle()
@@ -68,94 +67,10 @@ void ParticleManager::generateParticle()
 	quadTreeParticles.insert(*particlePtr, rect);
 }
 
-void ParticleManager::solveCollisionWithFrame(Particle* it)
-{
-	if (!it)
-	{
-		std::cout << "Pointer Failure in solveCollisionWithFrame !\n";
-		return;
-	}
-
-	// if it hits the bottom
-	if (it->getY() + it->getRadius() > screenHeight)
-		if (it->getDirection().x > 0 && it->getDirection().y > 0)
-			it->setDirection(Vector2{ 3.0f, -3.0f });
-		else if (it->getDirection().x < 0 && it->getDirection().y > 0)
-			it->setDirection(Vector2{ -3.0f, -3.0f });
-
-	// if it hits the left side
-	if (it->getX() - it->getRadius() < 0)
-		if (it->getDirection().x < 0 && it->getDirection().y < 0)	
-			it->setDirection(Vector2{ 3.0f, -3.0f });
-		else if (it->getDirection().x < 0 && it->getDirection().y > 0)
-			it->setDirection(Vector2{ 3.0f, 3.0f });
-
-	// if it hits the right side
-	if (it->getX() + it->getRadius() > screenWidth)
-		if (it->getDirection().x > 0 && it->getDirection().y > 0)
-			it->setDirection(Vector2{ -3.0f, 3.0f });
-		else if (it->getDirection().x > 0 && it->getDirection().y < 0)
-			it->setDirection(Vector2{ -3.0f, -3.0f });
-
-	// if it hits the top
-	if(it->getY() - it->getRadius() < 0)
-		if (it->getDirection().x > 0 && it->getDirection().y < 0)
-			it->setDirection(Vector2{ 3.0f, 3.0f });
-		else if (it->getDirection().x < 0 && it->getDirection().y < 0)
-			it->setDirection(Vector2{ -3.0f, 3.0f });
-
-}
-
-void ParticleManager::circleElasticCollisionResolution(Particle* it, Particle* particle)
-{
-	if (!it || !particle)
-	{
-		std::cout << "Pointer failure in circleElasticCollisionResolution!\n";
-		return;
-	}
-
-	float particleX = particle->getX() + particle->getRadius();
-	float particleY = particle->getY() + particle->getRadius();
-
-	if (it->getId() == particle->getId())
-	{
-		return;
-	}
-	it->setColor(BLUE);
-	particle->setColor(BLUE);
-
-	float distance = sqrt((it->getX() - particleX) * (it->getX() - particleX) + (it->getY() - particleY) * (it->getY() - particleY));
-
-	float normalX = (particleX - it->getX()) / distance;
-	float normalY = (particleY - it->getY()) / distance;
-
-	float tangentX = -normalY;
-	float tangentY = normalX;
-
-	float dpTangent1 = it->getDirection().x * tangentX + it->getDirection().y * tangentY;
-	float dpTangent2 = particle->getDirection().x * tangentX + particle->getDirection().y * tangentY;
-
-	float dpNormal1 = it->getDirection().x * normalX + it->getDirection().y * normalY;
-	float dpNormal2 = particle->getDirection().x * normalX + particle->getDirection().y * normalY;
-	
-	// conservation of momentum
-	float m1 = (dpNormal1 * (it->getMass() - particle->getMass()) + 2.0f * particle->getMass() * dpNormal2) / (it->getMass() + particle->getMass());
-	float m2 = (dpNormal2 * (particle->getMass() - it->getMass()) + 2.0f * it->getMass() * dpNormal1) / (it->getMass() + particle->getMass());
-
-	it->setDirection(Vector2{ tangentX * dpTangent1 + normalX * m1, tangentY * dpTangent1 + normalY * m1});
-	particle->setDirection(Vector2{ tangentX * dpTangent2 + normalX * m2, tangentY * dpTangent2 + normalY * m2});
-}
-
 void ParticleManager::drawWithQuadTree()
 {
 	for (auto& it = quadTreeParticles.begin(); it != quadTreeParticles.end(); ++it)
-	{
-		//DrawRectangle(it->getX() - it->getRadius(), it->getY() - it->getRadius(), it->getRadius() * 2, it->getRadius() * 2, GREEN);
-
 		DrawCircle(it->getX(), it->getY(), it->getRadius(), it->getColor());
-		//DrawPixel(it->getX(), it->getY(), it->getColor());
-
-	}
 
 	quadTreeParticles.drawLines();
 }
@@ -169,48 +84,26 @@ void ParticleManager::updateWithQuadTree(float deltaT)
 		ptr->setX(ptr->getX() + 1 * ptr->getDirection().x * deltaT);
 		ptr->setY(ptr->getY() + 1 * ptr->getDirection().y * deltaT);
 
-		solveCollisionWithFrame(ptr);
+		ptr->solveCollisionWithFrame(screenWidth, screenHeight);
 	}
 
-	//auto start_time = std::chrono::high_resolution_clock::now();
+	quadTreeParticles.update();
+
+	for (auto& it = quadTreeParticles.begin(); it != quadTreeParticles.end(); ++it)
 	{
-		auto start_time = std::chrono::high_resolution_clock::now();
+		auto listOfPossibleParticleCollisions = quadTreeParticles.search(it->getRectangle());
 
-		quadTreeParticles.update();
-
-		auto end_time = std::chrono::high_resolution_clock::now();
-		auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
-
-		printf("update(erase all and insert all) Particle %d \n", duration.count());
-	}
-
-	{
-		auto start_time = std::chrono::high_resolution_clock::now();
-
-		for (auto& it = quadTreeParticles.begin(); it != quadTreeParticles.end(); ++it)
+		for (const auto& particle : listOfPossibleParticleCollisions)
 		{
-			//Rectangle particle1Rec{it->getX()  - 0, it->getY() - 0, it->getRadius() + 0, it->getRadius() + 0 };
-			auto listOfPossibleParticleCollisions = quadTreeParticles.search(it->getRectangle());
-
-			for (const auto& particle : listOfPossibleParticleCollisions)
+			if (CheckCollisionCircles(it->getPosition(), it->getRadius(), particle->getPosition(), particle->getRadius()))
 			{
-				if (CheckCollisionCircles(it->getPosition(), it->getRadius(), particle->getPosition(), particle->getRadius()))
-				{
-					// elastic collision resolution
-					Particle* first = &*it;
-					Particle* second = &*particle;
-					circleElasticCollisionResolution(first, second);
-				}
+				// elastic collision resolution
+				Particle* first = &*it;
+				Particle* second = &*particle;
+				first->circleElasticCollisionResolution(second);
 			}
 		}
-		auto end_time = std::chrono::high_resolution_clock::now();
-		auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
-
-		printf("collision with other circles Particle %d \n\n\n", duration.count());
 	}
-
-
-	// update element position in the QuadTree
 }
 
 void ParticleManager::drawWithBvh()
@@ -220,7 +113,6 @@ void ParticleManager::drawWithBvh()
 		DrawCircle(elem.second->getX(), elem.second->getY(), elem.second->getRadius(), elem.second->getColor());
 	}
 
-	
 	for (auto elem : bvhContainer->getBvhNodes())
 	{
 		int x0 = elem.aabbMin.x;
@@ -232,7 +124,6 @@ void ParticleManager::drawWithBvh()
 		DrawLine(x1, y0, x1, y1, GRAY);
 		DrawLine(x0, y1, x1, y1, GRAY);
 	}
-	
 }
 
 void ParticleManager::updateWithBvh(float deltaT)
@@ -244,9 +135,8 @@ void ParticleManager::updateWithBvh(float deltaT)
 		ptr->setX(ptr->getX() + 1 * ptr->getDirection().x * deltaT);
 		ptr->setY(ptr->getY() + 1 * ptr->getDirection().y * deltaT);
 
-		solveCollisionWithFrame(ptr);
+		ptr->solveCollisionWithFrame(screenWidth, screenHeight);
 	}
-
 
 	bvhContainer->update(deltaT, particleMap);
 	auto boxes = bvhContainer->getBoxes();
@@ -276,7 +166,7 @@ void ParticleManager::updateWithBvh(float deltaT)
 					Particle* first = &(*particleMap[boxes[node.firstBox].id]);
 					Particle* second = &(*particleMap[boxes[node.firstBox + 1].id]);
 					
-					circleElasticCollisionResolution(first, second);
+					first->circleElasticCollisionResolution(second);
 				}
 			}
 		}
@@ -303,7 +193,6 @@ void ParticleManager::drawWithGrid()
 		DrawLine(x0, y0, x1, y1, GRAY);
 	}
 
-
 	for (int i = 0; i < 108; i++)
 	{
 		int x0 = 0;
@@ -313,8 +202,6 @@ void ParticleManager::drawWithGrid()
 
 		DrawLine(x0, y0, x1, y1, GRAY);
 	}
-
-
 }
 
 void ParticleManager::updateWithGrid(float deltaT)
@@ -326,7 +213,7 @@ void ParticleManager::updateWithGrid(float deltaT)
 		ptr->setX(ptr->getX() + 1 * ptr->getDirection().x * deltaT);
 		ptr->setY(ptr->getY() + 1 * ptr->getDirection().y * deltaT);
 
-		solveCollisionWithFrame(ptr);
+		ptr->solveCollisionWithFrame(screenWidth, screenHeight);
 	}
 
 	gridContainer->update(particleMap);
@@ -350,7 +237,7 @@ void ParticleManager::updateWithGrid(float deltaT)
 
 					if (CheckCollisionCircles(center1, radius1, center2, radius2))
 					{
-						circleElasticCollisionResolution(first, second);
+						first->circleElasticCollisionResolution(second);
 					}
 				}
 			}

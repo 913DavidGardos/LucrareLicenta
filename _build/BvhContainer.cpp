@@ -31,7 +31,7 @@ Vertex Vertex::operator=(int other)
 bool Node::isLeaf() { return boxCount > 0; }
 
 Vertex Box::center() { return Vertex{ (vertex1 + vertex0).x / 2, (vertex1 + vertex0).y / 2 }; }
-
+/*
 // Bvh Container
 BvhContainer::BvhContainer(std::map<int, std::shared_ptr<Particle>>& particleMap)
 {
@@ -211,3 +211,5 @@ std::vector<Box>& BvhContainer::getBoxes()
 {
     return boxes;
 }
+
+*/

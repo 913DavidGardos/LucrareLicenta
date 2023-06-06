@@ -17,6 +17,10 @@ public:
 	void setPosition(const Vector2&) override;
 	void setX(float x) override;
 	void setY(float y) override;
+
+	void solveCollisionWithFrame(int, int);
+	void circleElasticCollisionResolution(Particle* particle);
+
 	int getId();
 	Color getColor();
 	Rectangle getRectangle();
