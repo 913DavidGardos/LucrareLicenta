@@ -8,6 +8,9 @@ class Particle : public ParticleInterface2D
 {
 public:
 	Particle(float radius, Vector2 position);
+	Particle(const Particle& other);
+
+	~Particle();
 	float getX() override;
 	float getY() override;
 	float getRadius() override;

@@ -5,11 +5,10 @@
 template <typename T>
 class StaticQuadTreeContainer
 {
-	using QuadTreeContainer = std::list<T>;
+	using QuadTreeContainer = std::list<std::shared_ptr<T>>;
 
 protected:
-	QuadTreeContainer allItems; // Particles
-	std::list<typename QuadTreeContainer::iterator> allItemsPointers;
+	QuadTreeContainer allItems;
 	StaticQuadTree<typename QuadTreeContainer::iterator> root;
 	std::list<std::shared_ptr<StaticQuadTree<typename QuadTreeContainer::iterator>>> leaves; // Nodes from the QuadTree
 
@@ -36,11 +35,9 @@ public:
 		root.clear();
 		allItems.clear();
 	}
-	void insert(const T& item, const Rectangle& itemSize)
+	void insert(const std::shared_ptr<T> item, const Rectangle& itemSize)
 	{
 		allItems.push_back(item);
-		allItemsPointers.push_back(std::prev(allItems.end()));
-
 		root.insert(std::prev(allItems.end()), itemSize);
 	}
 
@@ -67,29 +64,12 @@ public:
 
 	void update()
 	{
+		root.clear();
+
+		for (auto iter = allItems.begin(); iter != allItems.end(); ++iter)
 		{
-			auto start_time = std::chrono::high_resolution_clock::now();
-
-			root.clear();
-
-			auto end_time = std::chrono::high_resolution_clock::now();
-			auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
-
-			printf("\troot.clear() time Particle %d \n", duration.count());
-		}
-
-		{
-			auto start_time = std::chrono::high_resolution_clock::now();
-
-			for (auto it = allItems.begin(); it != allItems.end(); ++it)
-			{
-				root.insert(it, Rectangle{ it->getX() - it->getRadius(), it->getY() - it->getRadius(), it->getRadius() * 2.f, it->getRadius() * 2.f });
-			}
-
-			auto end_time = std::chrono::high_resolution_clock::now();
-			auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
-
-			printf("\treinsertion time Particle %d \n", duration.count());
+			auto it = *iter;
+			root.insert(iter, Rectangle{ it->getX() - it->getRadius(), it->getY() - it->getRadius(), it->getRadius() * 2.f, it->getRadius() * 2.f });
 		}
 	}
 

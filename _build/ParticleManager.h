@@ -10,20 +10,34 @@
 #include "QuadTreeContainer.h"
 #include "GridContainer.h"
 
+enum class Algo
+{
+	QuadTree,
+	Grid,
+	BoundingVolume
+};
+
+
 class ParticleManager
 {
 public:
 	ParticleManager(int screenWidth, int screenHeight);
 	void InitParticles(int numberOfParticles);
-	void removeParticles(int number);
 	void drawParticles();
+	void updateNumberOfParticles(int);
 	const StaticQuadTreeContainer<Particle>& getQuadTreeParticles();
 	void updateParticles(float);
+	void updateParticleVelocity(float newVelocity);
+	void updateQuadTreeContainerWithMap(int deltaT);
+	void toggleLines();
+	void startQuadTree();
+	void startGrid();
+	void startBoundingVolume();
+	int getScreenWidth();
+	int getScreenHeight();
 
 private:
 	void generateParticle();
-	void solveCollisionWithFrame(Particle*);
-	void circleElasticCollisionResolution(Particle*, Particle*);
 	void drawWithQuadTree();
 	void updateWithQuadTree(float);
 	void drawWithBvh();
@@ -44,5 +58,7 @@ private:
 
 	std::random_device randomDevice;
 	std::mt19937 randomGenerator;
+	bool onOffLines;
+	Algo algoState;
 };
 

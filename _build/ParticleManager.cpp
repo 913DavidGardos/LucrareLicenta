@@ -5,21 +5,43 @@
 
 ParticleManager::ParticleManager(int screenWidth, int screenHeight) : 
 	screenWidth(screenWidth), screenHeight(screenHeight),
-	quadTreeParticles(Rectangle{ 0.f, 0.f, static_cast<float>(screenWidth), static_cast<float>(screenHeight)}, 0)
-
+	quadTreeParticles(Rectangle{ 0.f, 0.f, static_cast<float>(screenWidth), static_cast<float>(screenHeight)}, 0),
+	algoState(Algo::QuadTree)
 {
 	randomGenerator = std::mt19937(randomDevice());
+	onOffLines = true;
 }
 
 void ParticleManager::InitParticles(int numberOfParticles)
 {
+	particleMap.clear();
+
+	allParticles.clear();
+
+	quadTreeParticles.clear();
+
+	bvhContainer.reset();
+
+	gridContainer.reset();
+
+
 	for (int i = 0; i < numberOfParticles; i++)
 		generateParticle();
+
+	for (auto elem : particleMap)
+	{
+		int randomX = elem.second->getX();
+		int randomRadius = elem.second->getRadius();
+		int randomY = elem.second->getY();
+
+		Rectangle rect{ randomX - randomRadius, randomY - randomRadius, randomRadius * 2.f, randomRadius * 2.f };
+		quadTreeParticles.insert(elem.second, rect);
+	}
 
 	bvhContainer = std::make_unique<BvhContainer<Particle>>(particleMap);
 	bvhContainer->buildBVH();
 
-	gridContainer = std::make_unique<GridContainer<Particle>>(108, 192, screenWidth, screenHeight);
+	gridContainer = std::make_unique<GridContainer<Particle>>(100, 192, screenWidth, screenHeight);
 	for (auto elem : particleMap)
 	{
 		gridContainer->insert(elem.second->getId(), elem.second->getX(), elem.second->getY());
@@ -28,9 +50,17 @@ void ParticleManager::InitParticles(int numberOfParticles)
 
 void ParticleManager::drawParticles()
 {
-	//drawWithQuadTree();
-	//drawWithBvh();
-	drawWithGrid();
+	if (algoState == Algo::QuadTree)
+		drawWithQuadTree();
+	else if (algoState == Algo::Grid)
+		drawWithGrid();
+	else if (algoState == Algo::BoundingVolume)
+		drawWithBvh();
+}
+
+void ParticleManager::updateNumberOfParticles(int nParticles)
+{
+	InitParticles(nParticles);
 }
 
 const StaticQuadTreeContainer<Particle>& ParticleManager::getQuadTreeParticles()
@@ -40,9 +70,57 @@ const StaticQuadTreeContainer<Particle>& ParticleManager::getQuadTreeParticles()
 
 void ParticleManager::updateParticles(float deltaT)
 {
-	//updateWithQuadTree(deltaT);
-	//updateWithBvh(deltaT);
-	updateWithGrid(deltaT);
+	if (algoState == Algo::QuadTree)
+		updateWithQuadTree(deltaT);
+	else if (algoState == Algo::Grid)
+	{
+		updateWithGrid(deltaT);
+	}
+	else if (algoState == Algo::BoundingVolume)
+	{
+		updateWithBvh(deltaT);
+	}
+}
+
+void ParticleManager::updateParticleVelocity(float newVelocity)
+{
+	for (auto iter = quadTreeParticles.begin(); iter != quadTreeParticles.end(); ++iter)
+	{
+		auto it = *iter;
+		Vector2 newDirection{ it->getDirection().x * newVelocity, it->getDirection().y * newVelocity };
+		it->setDirection(newDirection);
+		particleMap[it->getId()]->setDirection(newDirection);
+	}
+}
+
+void ParticleManager::toggleLines()
+{
+	onOffLines = !onOffLines;
+}
+
+void ParticleManager::startQuadTree()
+{
+	algoState = Algo::QuadTree;
+}
+
+void ParticleManager::startGrid()
+{
+	algoState = Algo::Grid;
+}
+
+void ParticleManager::startBoundingVolume()
+{
+	algoState = Algo::BoundingVolume;
+}
+
+int ParticleManager::getScreenWidth()
+{
+	return screenWidth;
+}
+
+int ParticleManager::getScreenHeight()
+{
+	return screenHeight;
 }
 
 void ParticleManager::generateParticle()
@@ -63,22 +141,27 @@ void ParticleManager::generateParticle()
 	std::pair<int, std::shared_ptr<Particle>> particlePair(particlePtr->getId(), particlePtr);
 	particleMap.insert(particlePair);
 
-	Rectangle rect{ randomX - randomRadius, randomY - randomRadius, randomRadius * 2.f, randomRadius * 2.f };
-	quadTreeParticles.insert(*particlePtr, rect);
+	//Rectangle rect{ randomX - randomRadius, randomY - randomRadius, randomRadius * 2.f, randomRadius * 2.f };
+	//quadTreeParticles.insert(*particlePtr, rect);
 }
 
 void ParticleManager::drawWithQuadTree()
 {
-	for (auto& it = quadTreeParticles.begin(); it != quadTreeParticles.end(); ++it)
+	for (auto iter = quadTreeParticles.begin(); iter != quadTreeParticles.end(); ++iter)
+	{
+		auto it = *iter;
 		DrawCircle(it->getX(), it->getY(), it->getRadius(), it->getColor());
+	}
 
-	quadTreeParticles.drawLines();
+	if(onOffLines)
+		quadTreeParticles.drawLines();
 }
 
 void ParticleManager::updateWithQuadTree(float deltaT)
 {
-	for (auto it = quadTreeParticles.begin(); it != quadTreeParticles.end(); ++it)
+	for (auto iter = quadTreeParticles.begin(); iter != quadTreeParticles.end(); ++iter)
 	{
+		auto it = *iter;
 		Particle* ptr = &*it;
 
 		ptr->setX(ptr->getX() + 1 * ptr->getDirection().x * deltaT);
@@ -89,12 +172,14 @@ void ParticleManager::updateWithQuadTree(float deltaT)
 
 	quadTreeParticles.update();
 
-	for (auto& it = quadTreeParticles.begin(); it != quadTreeParticles.end(); ++it)
+	for (auto& iter = quadTreeParticles.begin(); iter != quadTreeParticles.end(); ++iter)
 	{
+		auto it = *iter;
 		auto listOfPossibleParticleCollisions = quadTreeParticles.search(it->getRectangle());
 
-		for (const auto& particle : listOfPossibleParticleCollisions)
+		for (const auto& particleIt : listOfPossibleParticleCollisions)
 		{
+			auto particle = *particleIt;
 			if (CheckCollisionCircles(it->getPosition(), it->getRadius(), particle->getPosition(), particle->getRadius()))
 			{
 				// elastic collision resolution
@@ -113,17 +198,18 @@ void ParticleManager::drawWithBvh()
 		DrawCircle(elem.second->getX(), elem.second->getY(), elem.second->getRadius(), elem.second->getColor());
 	}
 
-	for (auto elem : bvhContainer->getBvhNodes())
-	{
-		int x0 = elem.aabbMin.x;
-		int y0 = elem.aabbMin.y;
-		int x1 = elem.aabbMax.x;
-		int y1 = elem.aabbMax.y;
-		DrawLine(x0, y0, x1, y0, GRAY);
-		DrawLine(x0, y0, x0, y1, GRAY);
-		DrawLine(x1, y0, x1, y1, GRAY);
-		DrawLine(x0, y1, x1, y1, GRAY);
-	}
+	if (onOffLines)
+		for (auto elem : bvhContainer->getBvhNodes())
+		{
+			int x0 = elem.aabbMin.x;
+			int y0 = elem.aabbMin.y;
+			int x1 = elem.aabbMax.x;
+			int y1 = elem.aabbMax.y;
+			DrawLine(x0, y0, x1, y0, GRAY);
+			DrawLine(x0, y0, x0, y1, GRAY);
+			DrawLine(x1, y0, x1, y1, GRAY);
+			DrawLine(x0, y1, x1, y1, GRAY);
+		}
 }
 
 void ParticleManager::updateWithBvh(float deltaT)
@@ -180,27 +266,30 @@ void ParticleManager::drawWithGrid()
 		DrawCircle(elem.second->getX(), elem.second->getY(), elem.second->getRadius(), elem.second->getColor());
 	}
 
-	// print columns 108, 192
-	int columnCoef = screenWidth/gridContainer->getCols();
-	int rowCoef = screenHeight/ gridContainer->getRows();
-	for (int i = 0; i < 192; i++)
+	if (onOffLines)
 	{
-		int x0 = i * columnCoef;
-		int y0 = 0;
-		int x1 = i * columnCoef;
-		int y1 = screenHeight;
-	
-		DrawLine(x0, y0, x1, y1, GRAY);
-	}
+		// print columns 108, 192
+		int columnCoef = screenWidth / gridContainer->getCols();
+		int rowCoef = screenHeight / gridContainer->getRows();
+		for (int i = 0; i < 192; i++)
+		{
+			int x0 = i * columnCoef;
+			int y0 = 0;
+			int x1 = i * columnCoef;
+			int y1 = screenHeight;
 
-	for (int i = 0; i < 108; i++)
-	{
-		int x0 = 0;
-		int y0 = i * rowCoef;
-		int x1 = screenWidth;
-		int y1 = i * rowCoef;
+			DrawLine(x0, y0, x1, y1, GRAY);
+		}
 
-		DrawLine(x0, y0, x1, y1, GRAY);
+		for (int i = 0; i < 108; i++)
+		{
+			int x0 = 0;
+			int y0 = i * rowCoef;
+			int x1 = screenWidth;
+			int y1 = i * rowCoef;
+
+			DrawLine(x0, y0, x1, y1, GRAY);
+		}
 	}
 }
 

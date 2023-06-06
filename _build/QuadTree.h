@@ -54,6 +54,7 @@ public:
 
 	void insert(const T& item, const Rectangle& itemSize)
 	{
+
 		for (int i = 0; i < 4; i++)
 		{
 			if (firstContainsSecond(childRec[i], itemSize))

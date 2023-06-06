@@ -204,6 +204,11 @@ public:
         return boxes;
     }
 
+    void reset()
+    {
+        boxes.clear();
+        nvhNode.clear();
+    }
 
 private:
     std::vector<Box> boxes;

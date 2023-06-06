@@ -138,6 +138,11 @@ public:
 		return cols;
 	}
 
+	void reset()
+	{
+		grid.clear();
+		idToIndexMap.clear();
+	}
 private:
 	int rows, cols;
 	float cellWidth, cellHeight;
