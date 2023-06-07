@@ -41,7 +41,7 @@ void ParticleManager::InitParticles(int numberOfParticles)
 	bvhContainer = std::make_unique<BvhContainer<Particle>>(particleMap);
 	bvhContainer->buildBVH();
 
-	gridContainer = std::make_unique<GridContainer<Particle>>(100, 192, screenWidth, screenHeight);
+	gridContainer = std::make_unique<GridContainer<Particle>>(1000, 1920, screenWidth, screenHeight);
 	for (auto elem : particleMap)
 	{
 		gridContainer->insert(elem.second->getId(), elem.second->getX(), elem.second->getY());
@@ -127,7 +127,7 @@ void ParticleManager::generateParticle()
 {
 	std::uniform_real_distribution<float> xDistrib(0, screenWidth);
 	std::uniform_real_distribution<float> yDistrib(0, screenHeight);
-	std::uniform_real_distribution<float> radiusDistrib(4.f, 5.2f);
+	std::uniform_real_distribution<float> radiusDistrib(0.1f, 0.9f);
 
 	float randomX = xDistrib(randomGenerator);
 	float randomY = yDistrib(randomGenerator);
@@ -137,7 +137,7 @@ void ParticleManager::generateParticle()
 
 	particlePtr->setDirection(Vector2{3.0f, 3.0f});
 	
-	allParticles.push_back(particlePtr);
+	//allParticles.push_back(particlePtr);
 	std::pair<int, std::shared_ptr<Particle>> particlePair(particlePtr->getId(), particlePtr);
 	particleMap.insert(particlePair);
 

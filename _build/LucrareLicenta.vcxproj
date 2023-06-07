@@ -263,6 +263,7 @@
     <ClInclude Include="ParticleManager.h" />
     <ClInclude Include="QuadTree.h" />
     <ClInclude Include="QuadTreeContainer.h" />
+    <ClInclude Include="Ui.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BvhContainer.cpp" />
@@ -271,6 +272,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Particle.cpp" />
     <ClCompile Include="ParticleManager.cpp" />
+    <ClCompile Include="Ui.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

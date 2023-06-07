@@ -2,23 +2,23 @@
 #include<iostream>
 
 Particle::Particle(float radius, Vector2 position) : 
-	id(countInstance), radius(radius), direction(Vector2{ 0, 0 }), position(position), color(BLACK), mass(2 * radius)
+	id(countInstance), radius(radius), direction(Vector2{ 0, 0 }), position(position), mass(2 * radius)
 {
 	countInstance++;
 }
 
-Particle::Particle(const Particle& other)
-{
-
-	std::cout << "copyCOnstruct\n";
-}
+//Particle::Particle(const Particle& other)
+//{
+//
+//	std::cout << "copyCOnstruct\n";
+//}
 
 
 
 Particle::~Particle()
 {
 	countInstance--;
-	std::cout << countInstance << "\n";
+	//std::cout << countInstance << "\n";
 
 }
 
@@ -74,7 +74,7 @@ int Particle::getId()
 
 Color Particle::getColor()
 {
-	return color;
+	return BLACK;
 }
 
 Rectangle Particle::getRectangle()
@@ -89,7 +89,7 @@ float Particle::getMass()
 
 void Particle::setColor(Color other)
 {
-	color = other;
+	//color = other;
 }
 
 void Particle::solveCollisionWithFrame(int screenWidth, int screenHeight)
