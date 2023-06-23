@@ -2,11 +2,16 @@
 #include <chrono>
 #include <typeinfo>
 #include <iostream>
+#include "Timer.h"
+#define GRID_ROWS 50
+#define GRID_COLS 96
 
-ParticleManager::ParticleManager(int screenWidth, int screenHeight) : 
-	screenWidth(screenWidth), screenHeight(screenHeight),
-	quadTreeParticles(Rectangle{ 0.f, 0.f, static_cast<float>(screenWidth), static_cast<float>(screenHeight)}, 0),
-	algoState(Algo::QuadTree)
+ParticleManager::ParticleManager(int screenWidth, int screenHeight,MeasurementCollector& measurementCollector) :
+screenWidth(screenWidth), 
+screenHeight(screenHeight), 
+measurementCollector(measurementCollector),
+quadTreeParticles(Rectangle{ 0.f, 0.f, static_cast<float>(screenWidth), static_cast<float>(screenHeight) }, 0),
+algoState(Algo::QuadTree)
 {
 	randomGenerator = std::mt19937(randomDevice());
 	onOffLines = true;
@@ -14,6 +19,10 @@ ParticleManager::ParticleManager(int screenWidth, int screenHeight) :
 
 void ParticleManager::InitParticles(int numberOfParticles)
 {
+	this->numberOfParticles = numberOfParticles;
+
+	Timer h("InitParticles", measurementCollector, numberOfParticles);
+
 	particleMap.clear();
 
 	allParticles.clear();
@@ -41,7 +50,7 @@ void ParticleManager::InitParticles(int numberOfParticles)
 	bvhContainer = std::make_unique<BvhContainer<Particle>>(particleMap);
 	bvhContainer->buildBVH();
 
-	gridContainer = std::make_unique<GridContainer<Particle>>(1000, 1920, screenWidth, screenHeight);
+	gridContainer = std::make_unique<GridContainer<Particle>>(GRID_ROWS, GRID_COLS, screenWidth, screenHeight);
 	for (auto elem : particleMap)
 	{
 		gridContainer->insert(elem.second->getId(), elem.second->getX(), elem.second->getY());
@@ -127,7 +136,7 @@ void ParticleManager::generateParticle()
 {
 	std::uniform_real_distribution<float> xDistrib(0, screenWidth);
 	std::uniform_real_distribution<float> yDistrib(0, screenHeight);
-	std::uniform_real_distribution<float> radiusDistrib(0.1f, 0.9f);
+	std::uniform_real_distribution<float> radiusDistrib(4.1f, 8.9f);
 
 	float randomX = xDistrib(randomGenerator);
 	float randomY = yDistrib(randomGenerator);
@@ -137,12 +146,8 @@ void ParticleManager::generateParticle()
 
 	particlePtr->setDirection(Vector2{3.0f, 3.0f});
 	
-	//allParticles.push_back(particlePtr);
 	std::pair<int, std::shared_ptr<Particle>> particlePair(particlePtr->getId(), particlePtr);
 	particleMap.insert(particlePair);
-
-	//Rectangle rect{ randomX - randomRadius, randomY - randomRadius, randomRadius * 2.f, randomRadius * 2.f };
-	//quadTreeParticles.insert(*particlePtr, rect);
 }
 
 void ParticleManager::drawWithQuadTree()
@@ -159,6 +164,9 @@ void ParticleManager::drawWithQuadTree()
 
 void ParticleManager::updateWithQuadTree(float deltaT)
 {
+	measurementCollector.insertSize("updateWithQuadTree", quadTreeParticles.sizeOfDataStructure(), numberOfParticles);
+	Timer b("updateWithQuadTree", measurementCollector, numberOfParticles);
+
 	for (auto iter = quadTreeParticles.begin(); iter != quadTreeParticles.end(); ++iter)
 	{
 		auto it = *iter;
@@ -214,6 +222,9 @@ void ParticleManager::drawWithBvh()
 
 void ParticleManager::updateWithBvh(float deltaT)
 {
+	measurementCollector.insertSize("updateWithBvh", bvhContainer->sizeOfDataStructure(), numberOfParticles);
+	Timer d("updateWithBvh", measurementCollector, numberOfParticles);
+
 	for (auto it = particleMap.begin(); it != particleMap.end(); ++it)
 	{
 		Particle* ptr = &*(it->second);
@@ -225,36 +236,17 @@ void ParticleManager::updateWithBvh(float deltaT)
 	}
 
 	bvhContainer->update(deltaT, particleMap);
-	auto boxes = bvhContainer->getBoxes();
-	auto nodes = bvhContainer->getBvhNodes();
 
-	for (auto node : nodes)
+	if (!bvhContainer->detectCollisions().empty())
 	{
-		if (node.isLeaf())
-		{
-			//check collision in the leaf
-			if (node.boxCount == 1)
-			{
-				// no collision i guess
-				continue;
-			}
-			if (node.boxCount > 1)
-			{
-				// might be collision between the 2 objects in the leaf
-				Vector2 center1 = Vector2{ boxes[node.firstBox].vertex0.x, boxes[node.firstBox].vertex0.y };
-				float radius1 = particleMap[boxes[node.firstBox].id]->getRadius();
-				Vector2 center2 = Vector2{ boxes[node.firstBox + 1].vertex0.x, boxes[node.firstBox + 1].vertex0.y };
-				float radius2 = particleMap[boxes[node.firstBox + 1].id]->getRadius();
+		auto colisions = bvhContainer->detectCollisions();
 
-				// if collision
-				if (CheckCollisionCircles(center1, radius1, center2, radius2))
-				{
-					Particle* first = &(*particleMap[boxes[node.firstBox].id]);
-					Particle* second = &(*particleMap[boxes[node.firstBox + 1].id]);
-					
-					first->circleElasticCollisionResolution(second);
-				}
-			}
+		for(auto colision : colisions)
+		{
+			Particle* first = &(*particleMap[colision.first]);
+			Particle* second = &(*particleMap[colision.second]);
+
+			first->circleElasticCollisionResolution(second);
 		}
 	}
 }
@@ -268,10 +260,9 @@ void ParticleManager::drawWithGrid()
 
 	if (onOffLines)
 	{
-		// print columns 108, 192
 		int columnCoef = screenWidth / gridContainer->getCols();
 		int rowCoef = screenHeight / gridContainer->getRows();
-		for (int i = 0; i < 192; i++)
+		for (int i = 0; i < GRID_COLS; i++)
 		{
 			int x0 = i * columnCoef;
 			int y0 = 0;
@@ -281,7 +272,7 @@ void ParticleManager::drawWithGrid()
 			DrawLine(x0, y0, x1, y1, GRAY);
 		}
 
-		for (int i = 0; i < 108; i++)
+		for (int i = 0; i < GRID_ROWS; i++)
 		{
 			int x0 = 0;
 			int y0 = i * rowCoef;
@@ -295,6 +286,9 @@ void ParticleManager::drawWithGrid()
 
 void ParticleManager::updateWithGrid(float deltaT)
 {
+	measurementCollector.insertSize("updateWithGrid", gridContainer->sizeOfDataStructure(), numberOfParticles);
+	Timer f("updateWithGrid", measurementCollector, numberOfParticles);
+
 	for (auto it = particleMap.begin(); it != particleMap.end(); ++it)
 	{
 		Particle* ptr = &*(it->second);

@@ -7,19 +7,9 @@ Particle::Particle(float radius, Vector2 position) :
 	countInstance++;
 }
 
-//Particle::Particle(const Particle& other)
-//{
-//
-//	std::cout << "copyCOnstruct\n";
-//}
-
-
-
 Particle::~Particle()
 {
 	countInstance--;
-	//std::cout << countInstance << "\n";
-
 }
 
 float Particle::getX() 

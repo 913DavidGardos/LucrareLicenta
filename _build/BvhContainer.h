@@ -5,37 +5,76 @@
 #include <vector>
 #include <map>
 #include <utility>
-
 #include "Particle.h"
 
+/// \struct Vertex
+/// \brief Reprezinta un vector
 struct Vertex
 {
-    float x, y;
+    float x; ///< The x-coordinate of the vertex.
+    float y; ///< The y-coordinate of the vertex.
+
+    /// \brief Overloads the '+' operator to perform vector addition.
+    /// \param other The vertex to be added.
+    /// \return The result of the addition operation.
     Vertex operator+(const Vertex& other) const;
+
+    /// \brief Overloads the '-' operator to perform vector subtraction.
+    /// \param other The vertex to be subtracted.
+    /// \return The result of the subtraction operation.
     Vertex operator-(const Vertex& other) const;
+    
+    /// \brief Overloads the assignment operator '=' to copy the values from another vertex.
+    /// \param other The vertex to be copied from.
+    /// \return A reference to the updated vertex.
     Vertex& operator=(const Vertex& other);
+
+    /// \brief Overloads the assignment operator '=' to set both x and y coordinates to a given value.
+    /// \param other The value to be assigned to both x and y coordinates.
+    /// \return A reference to the updated vertex.
     Vertex operator=(int other);
 };
 
+/// \struct Box
+/// \brief Represents a box with an ID and two vertices defining its boundaries.
 struct Box 
 { 
-    int id;
-    Vertex vertex0, vertex1; 
+    int id; ///< The ID of the box.
+    Vertex vertex0; ///< The first vertex defining the box.
+    Vertex vertex1; ///< The second vertex defining the box.
+    
+    /// \brief Calculates and returns the center vertex of the box.
+    /// \return The center vertex.
     Vertex center();
 };
 
+/// \struct Node
+/// \brief Represents a node in a bounding volume hierarchy (BVH).
 struct Node
 {
-    Vertex aabbMin, aabbMax;
-    int leftChild, firstBox, boxCount;
+    Vertex aabbMin; ///< The minimum point of the axis-aligned bounding box (AABB) enclosing the node.
+    Vertex aabbMax; ///< The maximum point of the AABB enclosing the node.
+    int leftChild; ///< The index of the left child node in the BVH structure.
+    int firstBox; ///< The index of the first box in the list of boxes enclosed by the node.
+    int boxCount; ///< The number of boxes enclosed by the node.
+
+    /// \brief Checks if the node is a leaf node.
+    /// \return `true` if the node is a leaf, `false` otherwise.
     bool isLeaf();
 };
 
-
+/// \class BvhContainer
+/// \brief A class template for constructing and updating a bounding volume hierarchy (BVH) container.
+///
+/// The BvhContainer class is used to build and update a BVH structure based on a map of particles.
+/// It provides methods to compute the bounding boxes, subdivide the nodes, and update the BVH.
 template<typename T>
 class BvhContainer
 {
 public:
+
+    /// \brief Constructor for the BvhContainer class.
+    /// \param particleMap The map of particles used to construct the BVH.  
     BvhContainer(std::map<int, std::shared_ptr<T>>& particleMap)
     {
         for (int i = 0; i < particleMap.size(); i++)
@@ -76,7 +115,6 @@ public:
         b = temp;
     }
 
-
     void updateNodeBounds(int nodeIdx)
     {
         // computes/updates the bounds of the node
@@ -89,12 +127,10 @@ public:
             node.aabbMin = Min(node.aabbMin, leftBox.vertex0);
             node.aabbMax = Max(node.aabbMax, leftBox.vertex1);
         }
-
-        //std::cout << "updateNodeBounds" << "\n";
     }
+
     void subdivide(int nodeIdx)
     {
-        //std::cout << "subdivide" << "\n";
 
         Node& node = bvhNode[nodeIdx];
         if (node.boxCount <= 2) return;
@@ -104,11 +140,6 @@ public:
         int axis = 0;
         if (extent.y > extent.x)
             axis = 1;
-
-        //if(axis == 0)
-        //    std::cout << "split axis =  x" << "\n";
-        //else
-        //    std::cout << "split axis =  y" << "\n";
 
         int splitPos;
         if (axis == 0)
@@ -164,6 +195,7 @@ public:
         subdivide(leftChildIdx);
         subdivide(rightChildIdx);
     }
+
     void buildBVH()
     {
         Node& root = bvhNode[rootNodeIndex];
@@ -173,6 +205,9 @@ public:
         subdivide(rootNodeIndex);
     }
 
+    /// \brief Updates the BVH with the given delta time and map of particles.
+    /// \param deltaT The time difference since the last update.
+    /// \param particles The map of particles used to update the BVH.
     void update(int deltaT, std::map<int, std::shared_ptr<Particle>>& particles)
     {
         boxes.clear();
@@ -194,26 +229,108 @@ public:
         buildBVH();
     }
 
+    /// \brief Retrieves the list of BVH nodes.
+    /// \return The list of BVH nodes.
     std::vector<Node>& getBvhNodes()
     {
         return bvhNode;
     }
 
+    /// \brief Retrieves the list of boxes.
+    /// \return The list of boxes.
     std::vector<Box>& getBoxes()
     {
         return boxes;
     }
 
+    /// \brief Resets the BVH container.
     void reset()
     {
         boxes.clear();
         nvhNode.clear();
     }
 
-private:
-    std::vector<Box> boxes;
-    std::vector<Node> bvhNode;
-    int rootNodeIndex = 0;
-    int nodesUsed = 1;
-};
+    size_t sizeOfDataStructure()
+    {
+        size_t count = 0;
+        for (auto elem : boxes)
+        {
+            count += sizeof(elem.id);
+            count += sizeof(elem.vertex0);
+            count += sizeof(elem.vertex1);
+        }
+        for (auto elem : bvhNode)
+        {
+            count += sizeof(elem.aabbMax);
+            count += sizeof(elem.aabbMin);
+            count += sizeof(elem.boxCount);
+            count += sizeof(elem.firstBox);
+            count += sizeof(elem.leftChild);
+        }
+        count += sizeof(rootNodeIndex);
+        count += sizeof(nodesUsed);
+    
+        return count;
+    }
 
+    std::vector<std::pair<int, int>> detectCollisions()
+    {
+        std::vector<std::pair<int, int>> collisions;
+
+        // Traverse the BVH tree recursively
+        traverseBVH(rootNodeIndex, collisions);
+
+        return collisions;
+    }
+
+private:
+    void traverseBVH(int nodeIdx, std::vector<std::pair<int, int>>& collisions)
+    {
+        Node& node = bvhNode[nodeIdx];
+
+        if (node.isLeaf()) 
+        {
+            // Leaf node, check for collisions between boxes
+            int boxStartIdx = node.firstBox;
+            int boxEndIdx = boxStartIdx + node.boxCount - 1;
+
+            for (int i = boxStartIdx; i < boxEndIdx; ++i) 
+            {
+                for (int j = i + 1; j <= boxEndIdx; ++j)
+                {
+                    if (areBoxesColliding(boxes[i], boxes[j])) 
+                    {
+                        // Collision detected, store the box pair
+                        collisions.push_back(std::make_pair(boxes[i].id, boxes[j].id));
+                    }
+                }
+            }
+        }
+        else 
+        {
+            // Internal node, recursively traverse child nodes
+            traverseBVH(node.leftChild, collisions);
+            traverseBVH(node.leftChild + 1, collisions);
+        }
+    }
+
+    bool areBoxesColliding(const Box& boxA, const Box& boxB)
+    {
+        // Perform collision detection logic between the two boxes
+        // You can use whatever collision detection algorithm is suitable for your scenario
+
+        // Example: AABB collision detection
+        if (boxA.vertex0.x <= boxB.vertex1.x && boxA.vertex1.x >= boxB.vertex0.x &&
+            boxA.vertex0.y <= boxB.vertex1.y && boxA.vertex1.y >= boxB.vertex0.y) 
+        {
+            return true; // Boxes are colliding
+        }
+
+        return false; // Boxes are not colliding
+    }
+
+    std::vector<Box> boxes; ///< The list of boxes in the BVH.
+    std::vector<Node> bvhNode; ///< The list of BVH nodes.
+    int rootNodeIndex = 0; ///< The index of the root node in the BVH.
+    int nodesUsed = 1; ///< The number of nodes used in the BVH.
+};

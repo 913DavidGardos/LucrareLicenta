@@ -4,7 +4,6 @@ Ui::Ui(ParticleManager& pm) : pm(pm)
 {
 	screenWidth = pm.getScreenWidth();
 	screenHeight = pm.getScreenHeight();
-	gui = std::make_unique<Gui>(pm);
 }
 
 std::vector<std::string> Ui::tokenizeString(const std::string& input, char delimiter) {
@@ -23,6 +22,7 @@ void Ui::quadTreeCommands(std::vector<std::string>& tokens)
 {
     if (tokens.size() == 2)
     {
+        pm.startQuadTree();
         int number = std::stoi(tokens[1]);
         pm.updateNumberOfParticles(number);
     }
@@ -40,6 +40,7 @@ void Ui::bvhCommands(std::vector<std::string>& tokens)
 {
     if (tokens.size() == 2)
     {
+        pm.startBoundingVolume();
         int number = std::stoi(tokens[1]);
         pm.updateNumberOfParticles(number);
     }
@@ -57,6 +58,7 @@ void Ui::gridCommands(std::vector<std::string>& tokens)
 {
     if (tokens.size() == 2)
     {
+        pm.startGrid();
         int number = std::stoi(tokens[1]);
         pm.updateNumberOfParticles(number);
     }
@@ -77,6 +79,7 @@ void Ui::helpCommands(std::vector<std::string>& tokens)
     std::cout << "quadtree/bvh/grid velocity [number] - multiplies with the velocity of particles\n";
     std::cout << "exit - closes the program\n";
     std::cout << "start - start the simulation\n";
+    std::cout << "test - start the simulation for all algorithms\n";
 }
 
 void Ui::startCommands(std::vector<std::string>& tokens)
@@ -99,7 +102,28 @@ void Ui::startCommands(std::vector<std::string>& tokens)
 
 void Ui::guiCommands(std::vector<std::string>& tokens)
 {
+    if(!gui)
+        gui = std::make_unique<Gui>(pm);
+
     gui->Run();
+}
+
+void Ui::testCommands(std::vector<std::string>& tokens)
+{
+    for (int i = 1; i < 100; i++)
+    {
+        std::cout <<"Test running for  " << i * 1000 << " elements \n";
+
+        pm.InitParticles(i* 1000);
+        pm.startQuadTree();
+        pm.updateParticles(0.15f);
+
+        pm.startBoundingVolume();
+        pm.updateParticles(0.15f);
+
+        pm.startGrid();
+        pm.updateParticles(0.15f);
+    }
 }
 
 void Ui::run()
@@ -131,6 +155,8 @@ void Ui::run()
                 startCommands(tokens);
             if (tokens[0] == "gui")
                 guiCommands(tokens);
+            if (tokens[0] == "test")
+                testCommands(tokens);
         }
     }
 }

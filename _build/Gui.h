@@ -26,28 +26,16 @@ public:
 	Gui(ParticleManager& pm);
 	~Gui();
 	void Run();
-
 	void takeInputNumberOfParticles();
-
 	void drawTextBoxNr();
-
 	void drawTextBox();
-
 	void takeInputVelocity();
-
 	void updateAlgoOptions();
-
 	void drawAlgoOptions();
-
 	void checkInput();
-
 	void updateMenuOptions();
-
 	void drawMenuOptions();
-
 	void drawMenuButton();
-
-
 
 private:
 	void update();
@@ -87,4 +75,3 @@ private:
 	bool inputVelocity = false;
 	bool inputN = false;
 };
-

@@ -13,13 +13,10 @@ public:
 	void bvhCommands(std::vector<std::string>& tokens);
 	void gridCommands(std::vector<std::string>& tokens);
 	void helpCommands(std::vector<std::string>& tokens);
-	void update();
-	void linesCommands(std::vector<std::string>& tokens);
 	void startCommands(std::vector<std::string>& tokens);
 	void guiCommands(std::vector<std::string>& tokens);
-	void pauseCommands(std::vector<std::string>& tokens);
+	void testCommands(std::vector<std::string>& tokens);
 	void run();
-
 
 private:
 	ParticleManager& pm;
