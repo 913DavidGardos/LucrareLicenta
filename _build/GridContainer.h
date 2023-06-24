@@ -4,8 +4,7 @@
 #include<array>
 #include<iostream>
 
-/// \struct Cell
-/// \brief Represents a cell in the grid, storing a vector of item IDs contained within it.
+
 /// \struct Cell
 /// \brief Reprezinta o celula ce contine o lista de identificatori de elemente.
 struct Cell
