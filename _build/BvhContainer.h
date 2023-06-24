@@ -11,70 +11,69 @@
 /// \brief Reprezinta un vector
 struct Vertex
 {
-    float x; ///< The x-coordinate of the vertex.
-    float y; ///< The y-coordinate of the vertex.
+    float x; ///< coordonata x a vectorului.
+    float y; ///< coordonata y a vectorului.
 
-    /// \brief Overloads the '+' operator to perform vector addition.
-    /// \param other The vertex to be added.
-    /// \return The result of the addition operation.
+    /// \brief Suprascrie operatorul '+' pentru adunarea a doi vectori.
+    /// \param other Vectorul care este adunat.
+    /// \return Rezultatul adunarii celor doi vectori.
     Vertex operator+(const Vertex& other) const;
 
-    /// \brief Overloads the '-' operator to perform vector subtraction.
-    /// \param other The vertex to be subtracted.
-    /// \return The result of the subtraction operation.
+    /// \brief Suprascrie operatorul '-' pentru scaderea a doi vectori.
+    /// \param other Vectorul care este scazut.
+    /// \return Rezultatul scaderii celor doi vectori.
     Vertex operator-(const Vertex& other) const;
     
-    /// \brief Overloads the assignment operator '=' to copy the values from another vertex.
-    /// \param other The vertex to be copied from.
-    /// \return A reference to the updated vertex.
+    /// \brief Suprascrie operatorul '=' pentru a copia un vector.
+    /// \param other Vectorul care este copiat.
+    /// \return O referinta la vectorul din stanga operatorului '='.
     Vertex& operator=(const Vertex& other);
 
-    /// \brief Overloads the assignment operator '=' to set both x and y coordinates to a given value.
-    /// \param other The value to be assigned to both x and y coordinates.
-    /// \return A reference to the updated vertex.
+    /// \brief Suprascrie operatorul '=' pentru a copia aceasi valoare pentru coordonatele x si y.
+    /// \param other valoarea care este copiata.
+    /// \return vectorul cu coordonatele x si y updatate.
     Vertex operator=(int other);
 };
 
 /// \struct Box
-/// \brief Represents a box with an ID and two vertices defining its boundaries.
+/// \brief Reprezinta un dreptunghi care are id, un punct minim si un punct maxim
 struct Box 
 { 
-    int id; ///< The ID of the box.
-    Vertex vertex0; ///< The first vertex defining the box.
-    Vertex vertex1; ///< The second vertex defining the box.
+    int id; ///< ID ul de la Box
+    Vertex vertex0; ///< Punctul minim.
+    Vertex vertex1; ///< Punctul maxim.
     
-    /// \brief Calculates and returns the center vertex of the box.
-    /// \return The center vertex.
+    /// \brief Calculeaza centrul dreptunghiului.
+    /// \return Vector spre centrul dreptunghiului.
     Vertex center();
 };
 
 /// \struct Node
-/// \brief Represents a node in a bounding volume hierarchy (BVH).
+/// \brief Reprezinta un nod care este folosit in algoritmul BVH.
 struct Node
 {
-    Vertex aabbMin; ///< The minimum point of the axis-aligned bounding box (AABB) enclosing the node.
-    Vertex aabbMax; ///< The maximum point of the AABB enclosing the node.
-    int leftChild; ///< The index of the left child node in the BVH structure.
-    int firstBox; ///< The index of the first box in the list of boxes enclosed by the node.
-    int boxCount; ///< The number of boxes enclosed by the node.
+    Vertex aabbMin; ///< Punctul minim care constrange nodul.
+    Vertex aabbMax; ///< Punctul maxim care constrange nodul.
+    int leftChild; ///< Indexul copilului din partea stanga din arborele binar din algoritmul BVH.
+    int firstBox; ///<  Indexul primului dreptunghi in lista de dreptunghiuri cuprinse de nod..
+    int boxCount; ///< Numarul de dreptunghiuri pe care nodul le contine.
 
-    /// \brief Checks if the node is a leaf node.
-    /// \return `true` if the node is a leaf, `false` otherwise.
+    /// \brief Verifica daca nodul este frunza.
+    /// \return `true` daca nodul este frunza altfel `false`.
     bool isLeaf();
 };
 
 /// \class BvhContainer
-/// \brief A class template for constructing and updating a bounding volume hierarchy (BVH) container.
+/// \brief O clasa care are comportamentul unui algoritm BVH.
 ///
-/// The BvhContainer class is used to build and update a BVH structure based on a map of particles.
-/// It provides methods to compute the bounding boxes, subdivide the nodes, and update the BVH.
+/// Clasa Bvh Container prezinta functii care efectueaza constructia, updatarea si functionarea algoritmului BVH.
 template<typename T>
 class BvhContainer
 {
 public:
 
-    /// \brief Constructor for the BvhContainer class.
-    /// \param particleMap The map of particles used to construct the BVH.  
+    /// \brief Constructor pentru clasa BvhContainer.
+    /// \param particleMap structura de date care contine ID ul Particulei si Particula.  
     BvhContainer(std::map<int, std::shared_ptr<T>>& particleMap)
     {
         for (int i = 0; i < particleMap.size(); i++)
@@ -88,6 +87,10 @@ public:
         bvhNode.resize(2 * boxes.size());
     }
 
+    /// \brief Calculeaza punctul minim dintre cei doi vectori
+    /// \param a Primul vector.
+    /// \param a Al doilea vector.
+    /// \return Vector care reprezinta punctul minim dinre cei doi vectori a si b.
     Vertex Min(Vertex& a, Vertex& b)
     {
         Vertex result;
@@ -98,6 +101,10 @@ public:
         return result;
     }
 
+    /// \brief Calculeaza punctul maxim dintre cei doi vectori
+    /// \param a Primul vector.
+    /// \param a Al doilea vector.
+    /// \return Vector care reprezinta punctul maxim dinre cei doi vectori a si b.
     Vertex Max(Vertex& a, Vertex& b)
     {
         Vertex result;
@@ -108,6 +115,9 @@ public:
         return result;
     }
 
+    /// \brief Inlocuirea lui a cu b
+    /// \param a Primul Box.
+    /// \param a Al doilea Box.
     void swap(Box& a, Box& b)
     {
         Box temp = a;
@@ -115,6 +125,8 @@ public:
         b = temp;
     }
 
+    /// \brief Updatarea dreptunghiului care face constrangerea pentru nod
+    /// \param nodeIdx ID-ul nodului.
     void updateNodeBounds(int nodeIdx)
     {
         // computes/updates the bounds of the node
@@ -129,6 +141,8 @@ public:
         }
     }
 
+    /// \brief Divizeaza recursiv structura de date 
+    /// \param nodeIdx ID-ul nodului.
     void subdivide(int nodeIdx)
     {
 
@@ -196,6 +210,7 @@ public:
         subdivide(rightChildIdx);
     }
 
+    /// \brief Construieste structura de date pentru BVH
     void buildBVH()
     {
         Node& root = bvhNode[rootNodeIndex];
@@ -205,9 +220,9 @@ public:
         subdivide(rootNodeIndex);
     }
 
-    /// \brief Updates the BVH with the given delta time and map of particles.
-    /// \param deltaT The time difference since the last update.
-    /// \param particles The map of particles used to update the BVH.
+    /// \brief Updateaza structura de date cu valorile curente pe care le detin Particulele
+    /// \param deltaT diferenta de timp
+    /// \param particles structura de date care contine particulele.
     void update(int deltaT, std::map<int, std::shared_ptr<Particle>>& particles)
     {
         boxes.clear();
@@ -229,27 +244,29 @@ public:
         buildBVH();
     }
 
-    /// \brief Retrieves the list of BVH nodes.
-    /// \return The list of BVH nodes.
+    /// \brief Returneaza o lista cu nodurile din BVH
+    /// \return Lista care contine noduri
     std::vector<Node>& getBvhNodes()
     {
         return bvhNode;
     }
 
-    /// \brief Retrieves the list of boxes.
-    /// \return The list of boxes.
+    /// \brief Returneaza o lista cu Box-urile din BVH
+   /// \return Lista care contine Box-uri
     std::vector<Box>& getBoxes()
     {
         return boxes;
     }
 
-    /// \brief Resets the BVH container.
+    /// \brief Reseteaza structurile de date ale lui BVH
     void reset()
     {
         boxes.clear();
-        nvhNode.clear();
+        bvhNode.clear();
     }
 
+    /// \brief Calculeaza locul ocupat in memorie de structurile de date folosite de algoritm
+    /// \return Numarul de bytes care ocupa spatiu in memorie
     size_t sizeOfDataStructure()
     {
         size_t count = 0;
@@ -273,6 +290,8 @@ public:
         return count;
     }
 
+    /// \brief Verifica daca exista coliziune intre doua obiecte care sunt stocate in BVH
+    /// \return Lista care contine perechi de obiecte care sunt in coliziune
     std::vector<std::pair<int, int>> detectCollisions()
     {
         std::vector<std::pair<int, int>> collisions;
@@ -284,6 +303,9 @@ public:
     }
 
 private:
+    /// \brief Traverseaza arborele binar din BVH de la radacina la frunze
+    /// \param nodeIdx ID-ul nodului
+    /// \param collisions Lista care contine perechi de obiecte care sunt in coliziune
     void traverseBVH(int nodeIdx, std::vector<std::pair<int, int>>& collisions)
     {
         Node& node = bvhNode[nodeIdx];
@@ -314,6 +336,10 @@ private:
         }
     }
 
+    /// \brief Verifica daca doua Box-uri sunt in coliziune una cu alta
+    /// \param boxA Primul Box
+    /// \param boxB Al doilea Box
+    /// \return 'true' daca boxA se suprapune cu boxB altfel 'false'
     bool areBoxesColliding(const Box& boxA, const Box& boxB)
     {
         // Perform collision detection logic between the two boxes
@@ -329,8 +355,8 @@ private:
         return false; // Boxes are not colliding
     }
 
-    std::vector<Box> boxes; ///< The list of boxes in the BVH.
-    std::vector<Node> bvhNode; ///< The list of BVH nodes.
-    int rootNodeIndex = 0; ///< The index of the root node in the BVH.
-    int nodesUsed = 1; ///< The number of nodes used in the BVH.
+    std::vector<Box> boxes; ///< Lista de dreptunghiuri/Box-uri.
+    std::vector<Node> bvhNode; ///< Lista a nodurilor din BVH.
+    int rootNodeIndex = 0; ///< Indexul nodului radacina din BVH.
+    int nodesUsed = 1; ///< Numarul de noduri folosite in BVH.
 };

@@ -4,28 +4,30 @@
 #include "MeasurementCollector.h"
 
 /// \class Timer
-/// \brief A class for measuring the execution time of a function.
+/// \brief O clasa pentru masurarea timpului de executie al unei functii.
 ///
-/// The Timer class provides functionality to measure the execution time of a function. It uses
-/// the high-resolution clock to record the start time point when the Timer object is constructed.
-/// The duration can later be calculated by comparing the start time point with the end time point.
+/// Clasa Timer furnizeaza functionalitate pentru masurarea timpului de executie al unei functii. 
+/// Ea utilizeaza ceasul cu rezolutie inalta pentru a inregistra momentul de inceput cand obiectul Timer este construit.
+/// Durata poate fi ulterior calculata prin compararea momentului de inceput cu momentul de sfarsit.
 class Timer {
 
 public:
-	/// \brief Constructor for Timer objects.
-	///
-	/// This constructor initializes a Timer object with the provided function name and storage map.
-	///
-	/// \param functionName The name of the function being timed.
-	/// \param storage A pointer to the map where the duration will be stored.
-	Timer(std::string functionName, MeasurementCollector& measureCollector, int);
-	/// \brief Destructor for Timer objects.
-	///
-	/// The destructor calculates the duration and stores it in the storage map.
-	~Timer();
+    /// \brief Constructor pentru obiectele Timer.
+    ///
+    /// Acest constructor initializeaza un obiect Timer cu numele functiei si harta de stocare furnizate.
+    ///
+    /// \param functionName Numele functiei care este cronometrata.
+    /// \param measureCollector Referinta la harta unde va fi stocata durata.
+    Timer(std::string functionName, MeasurementCollector& measureCollector, int);
+
+    /// \brief Destructor pentru obiectele Timer.
+    ///
+    /// Destructorul calculeaza durata si o stocheaza in harta de stocare.
+    ~Timer();
+
 private:
-	std::string fnName; ///< The name of the function being timed.
-	MeasurementCollector& measureCollector; ///< Reference to the map where the duration will be stored.
-	std::chrono::time_point<std::chrono::high_resolution_clock> start; ///< The start time point for measuring the duration.
-	int nOfParticles;
+    std::string fnName; ///< Numele functiei care este cronometrata.
+    MeasurementCollector& measureCollector; ///< Referinta la harta unde va fi stocata durata.
+    std::chrono::time_point<std::chrono::high_resolution_clock> start; ///< Momentul de inceput pentru masurarea duratei.
+    int nOfParticles;
 };

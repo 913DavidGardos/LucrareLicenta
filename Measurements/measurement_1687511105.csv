@@ -1,0 +1,3 @@
+Function Name, Number of Items, Execution time (miliseconds), Memory space (kilobytes)
+InitParticles100, 100, 9.4013, 0
+updateWithQuadTree100, 100, 5.636, 18.628

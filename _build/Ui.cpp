@@ -79,6 +79,7 @@ void Ui::helpCommands(std::vector<std::string>& tokens)
     std::cout << "quadtree/bvh/grid velocity [number] - multiplies with the velocity of particles\n";
     std::cout << "exit - closes the program\n";
     std::cout << "start - start the simulation\n";
+    std::cout << "gui - start the gui\n";
     std::cout << "test - start the simulation for all algorithms\n";
 }
 
@@ -97,7 +98,6 @@ void Ui::startCommands(std::vector<std::string>& tokens)
 
     // Output the measured time
     std::cout << "Time taken: " << durationMs << " milliseconds" << std::endl;
-    std::cout << "Fps: " << durationMs << " milliseconds" << std::endl;
 }
 
 void Ui::guiCommands(std::vector<std::string>& tokens)
@@ -115,14 +115,14 @@ void Ui::testCommands(std::vector<std::string>& tokens)
         std::cout <<"Test running for  " << i * 1000 << " elements \n";
 
         pm.InitParticles(i* 1000);
-        pm.startQuadTree();
-        pm.updateParticles(0.15f);
+        //pm.startQuadTree();
+        //pm.updateParticles(0.15f);
 
         pm.startBoundingVolume();
         pm.updateParticles(0.15f);
 
-        pm.startGrid();
-        pm.updateParticles(0.15f);
+        //pm.startGrid();
+        //pm.updateParticles(0.15f);
     }
 }
 

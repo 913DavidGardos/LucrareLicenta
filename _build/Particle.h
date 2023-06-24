@@ -2,108 +2,136 @@
 #include "raylib.h"
 #include "ParticleInterface2D.h"
 
-/// \file
-/// This file contains the definition of the Particle class and its member functions.
 
-/// \brief A static variable to keep track of the number of Particle instances.
+/// \brief Variabila statica pentru a tine evidenta numarului de instante Particle.
 static int countInstance = 0;
 
-/// \class Particle
-/// \brief Represents a particle in a two-dimensional space.
+/**
+ * \class Particle
+ * \brief Reprezinta o particula intr-un spatiu bidimensional.
+ */
 class Particle : public ParticleInterface2D
 {
 public:
-    /// \brief Constructs a Particle with the specified radius and position.
-    /// \param radius The radius of the particle.
-    /// \param position The position of the particle.
+    /**
+     * \brief Construieste o particula cu raza si pozitia specificate.
+     * \param radius Raza particulei.
+     * \param position Pozitia particulei.
+     */
     Particle(float radius, Vector2 position);
 
-    /// \brief Deleted copy constructor to prevent copying Particle instances.
+    /**
+     * \brief Constructorul de copiere este dezactivat pentru a preveni copierea instantelor de Particle.
+     */
     Particle(const Particle& other) = delete;
 
-    /// \brief Destroys the Particle instance.
+    /**
+     * \brief Distrugerea instantei Particle.
+     */
     ~Particle();
 
-    /// \brief Retrieves the X coordinate of the particle's position.
-    /// \return The X coordinate of the particle's position.
+    /**
+     * \brief Obtine coordonata X a pozitiei particulei.
+     * \return Coordonata X a pozitiei particulei.
+     */
     float getX() override;
 
-    /// \brief Retrieves the Y coordinate of the particle's position.
-    /// \return The Y coordinate of the particle's position.
+    /**
+     * \brief Obtine coordonata Y a pozitiei particulei.
+     * \return Coordonata Y a pozitiei particulei.
+     */
     float getY() override;
 
-    /// \brief Retrieves the radius of the particle.
-    /// \return The radius of the particle.
+    /**
+     * \brief Obtine raza particulei.
+     * \return Raza particulei.
+     */
     float getRadius() override;
 
-    /// \brief Sets the direction of the particle.
-    /// \param direction The direction vector of the particle.
+    /**
+     * \brief Seteaza directia particulei.
+     * \param direction Vectorul de directie al particulei.
+     */
     void setDirection(const Vector2& direction) override;
 
-    /// \brief Retrieves the direction of the particle.
-    /// \return The direction vector of the particle.
+    /**
+     * \brief Obtine directia particulei.
+     * \return Vectorul de directie al particulei.
+     */
     Vector2 getDirection() override;
 
-    /// \brief Retrieves the position of the particle.
-    /// \return The position vector of the particle.
+    /**
+     * \brief Obtine pozitia particulei.
+     * \return Vectorul de pozitie al particulei.
+     */
     Vector2 getPosition() override;
 
-    /// \brief Sets the position of the particle.
-    /// \param position The position vector of the particle.
+    /**
+     * \brief Seteaza pozitia particulei.
+     * \param position Vectorul de pozitie al particulei.
+     */
     void setPosition(const Vector2& position) override;
 
-    /// \brief Sets the X coordinate of the particle's position.
-    /// \param x The X coordinate of the particle's position.
+    /**
+     * \brief Seteaza coordonata X a pozitiei particulei.
+     * \param x Coordonata X a pozitiei particulei.
+     */
     void setX(float x) override;
 
-    /// \brief Sets the Y coordinate of the particle's position.
-    /// \param y The Y coordinate of the particle's position.
+    /**
+     * \brief Seteaza coordonata Y a pozitiei particulei.
+     * \param y Coordonata Y a pozitiei particulei.
+     */
     void setY(float y) override;
 
-    //float getX();
-    //float getY();
-    //float getRadius();
-    //void setDirection(const Vector2&);
-    //Vector2 getDirection();
-    //Vector2 getPosition();
-    //void setPosition(const Vector2&);
-    //void setX(float x);
-    //void setY(float y);
-
-    /// \brief Solves collision between the particle and the frame of the specified dimensions.
-    /// \param frameWidth The width of the frame.
-    /// \param frameHeight The height of the frame.
+    /**
+     * \brief Rezolva coliziunea intre particula si cadrul cu dimensiunile specificate.
+     * \param frameWidth Latimea cadrului.
+     * \param frameHeight Inaltimea cadrului.
+     */
     void solveCollisionWithFrame(int frameWidth, int frameHeight);
 
-    /// \brief Resolves elastic collision between this particle and another particle.
-    /// \param particle A pointer to the other particle involved in the collision.
+    /**
+     * \brief Rezolva coliziunea elastica intre aceasta particula si o alta particula.
+     * \param particle Un pointer catre cealalta particula implicata in coliziune.
+     */
     void circleElasticCollisionResolution(Particle* particle);
 
-    /// \brief Retrieves the ID of the particle.
-    /// \return The ID of the particle.
+    /**
+     * \brief Obtine ID-ul particulei.
+     * \return ID-ul particulei.
+     */
     int getId();
 
-    /// \brief Retrieves the color of the particle.
-    /// \return The color of the particle.
+    /**
+     * \brief Obtine culoarea particulei.
+     * \return Culoarea particulei.
+     */
     Color getColor();
 
-    /// \brief Retrieves the rectangle representation of the particle.
-    /// \return The rectangle representing the particle.
+    /**
+     * \brief Obtine reprezentarea sub forma de dreptunghi a particulei.
+     * \return Dreptunghiul care reprezinta particula.
+     */
     Rectangle getRectangle();
 
-    /// \brief Retrieves the mass of the particle.
-    /// \return The mass of the particle.
+    /**
+     * \brief Obtine masa particulei.
+     * \return Masa particulei.
+     */
     float getMass();
 
-    /// \brief Sets the color of the particle.
-    /// \param other The new color for the particle.
+    /**
+     * \brief Seteaza culoarea particulei.
+     * \param other Noua culoare pentru particula.
+     */
     void setColor(Color other);
 
 private:
-    float radius;           ///< The radius of the particle.
-    Vector2 direction;      ///< The direction vector of the particle.
-    Vector2 position;       ///< The position vector of the particle.
-    int id;                 ///< The ID of the particle.
-    //Color color;          ///< The color of the particle.
-    float mass;             ///< The mass of the particle.
+    float radius;           ///< Raza particulei.
+    Vector2 direction;      ///< Vectorul de directie al particulei.
+    Vector2 position;       ///< Vectorul de pozitie al particulei.
+    int id;                 ///< ID-ul particulei.
+    //Color color;          ///< Culoarea particulei.
+    float mass;             ///< Masa particulei.
 };

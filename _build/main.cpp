@@ -6,7 +6,7 @@
 #include "FileManager.h"
 
 #define SCREEN_WIDTH 1920
-#define SCREEN_HEIGHT 1000
+#define SCREEN_HEIGHT 900
 
 int main()
 {

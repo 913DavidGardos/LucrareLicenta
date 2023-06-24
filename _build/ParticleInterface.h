@@ -1,21 +1,27 @@
 #pragma once
-/// \file
-/// This file contains the definition of the ParticleInterface class and its pure virtual member functions.
 
-/// \class ParticleInterface
-/// \brief An interface for particle objects in a two-dimensional space.
+/**
+ * \class ParticleInterface
+ * \brief O interfata pentru obiecte de particule intr-un spatiu bidimensional.
+ */
 class ParticleInterface
 {
 public:
-    /// \brief Retrieves the X coordinate of the particle's position.
-    /// \return The X coordinate of the particle's position.
+    /**
+     * \brief Obtine coordonata X a pozitiei particulei.
+     * \return Coordonata X a pozitiei particulei.
+     */
     virtual float getX() = 0;
 
-    /// \brief Retrieves the Y coordinate of the particle's position.
-    /// \return The Y coordinate of the particle's position.
+    /**
+     * \brief Obtine coordonata Y a pozitiei particulei.
+     * \return Coordonata Y a pozitiei particulei.
+     */
     virtual float getY() = 0;
 
-    /// \brief Retrieves the radius of the particle.
-    /// \return The radius of the particle.
+    /**
+     * \brief Obtine raza particulei.
+     * \return Raza particulei.
+     */
     virtual float getRadius() = 0;
 };

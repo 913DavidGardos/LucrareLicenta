@@ -1,12 +1,5 @@
 #pragma once
 
-/// \file ParticleManager.h
-/// \brief Contains the ParticleManager class and Algo enum.
-///
-/// This file provides the definition of the ParticleManager class
-/// and the Algo enum, which are used to manage particles and define
-/// different algorithms.
-
 #include <vector>
 #include <raylib.h>
 #include "ParticleInterface.h"
@@ -20,124 +13,168 @@
 #include "MeasurementCollector.h"
 
 
-/// \enum Algo
-/// \brief Defines different algorithms for the ParticleManager.
+/**
+ * \enum Algo
+ * \brief Defineste diferite algoritmi pentru ParticleManager.
+ */
 enum class Algo
 {
-    QuadTree, ///< QuadTree algorithm.
-    Grid,     ///< Grid algorithm.
-    BoundingVolume ///< Bounding volume hierarchy algorithm.
+    QuadTree, ///< Algoritmul QuadTree.
+    Grid,     ///< Algoritmul Grid.
+    BoundingVolume ///< Algoritmul de ierarhie a volumelor marginale.
 };
 
-/// \class ParticleManager
-/// \brief Manages particles and provides operations on them.
-///
-/// The ParticleManager class is responsible for managing particles,
-/// initializing particles, updating their state, and drawing them
-/// using different algorithms.
+/**
+ * \class ParticleManager
+ * \brief Gestionarea particulelor si furnizarea operatiilor pe acestea.
+ *
+ * Clasa ParticleManager este responsabila de gestionarea particulelor,
+ * de initializarea lor, de actualizarea starii si de desenarea lor
+ * folosind diferiti algoritmi.
+ */
 class ParticleManager
 {
 public:
-    /// \brief Constructor.
-    ///
-    /// \param screenWidth The width of the screen.
-    /// \param screenHeight The height of the screen.
+    /**
+     * \brief Constructor.
+     *
+     * \param screenWidth Latimea ecranului.
+     * \param screenHeight Inaltimea ecranului.
+     * \param measurementCollector Referinta la MeasurementCollector.
+     */
     ParticleManager(int screenWidth, int screenHeight, MeasurementCollector& measurementCollector);
 
-    /// \brief Initializes particles.
-    ///
-    /// \param numberOfParticles The number of particles to initialize.
+    /**
+     * \brief Initializeaza particulele.
+     *
+     * \param numberOfParticles Numarul de particule de initializat.
+     */
     void InitParticles(int numberOfParticles);
 
-    /// \brief Draws the particles.
+    /**
+     * \brief Deseneaza particulele.
+     */
     void drawParticles();
 
-    /// \brief Updates the number of particles.
-    ///
-    /// \param nParticles The new number of particles.
+    /**
+     * \brief Actualizeaza numarul de particule.
+     *
+     * \param nParticles Noul numar de particule.
+     */
     void updateNumberOfParticles(int nParticles);
 
-    /// \brief Gets the quadtree particles.
-    ///
-    /// \return The quadtree particles.
+    /**
+     * \brief Obtine particulele QuadTree.
+     *
+     * \return Particulele QuadTree.
+     */
     const StaticQuadTreeContainer<Particle>& getQuadTreeParticles();
 
-    /// \brief Updates the particles.
-    ///
-    /// \param deltaT The time step for the update.
+    /**
+     * \brief Actualizeaza particulele.
+     *
+     * \param deltaT Pasul de timp pentru actualizare.
+     */
     void updateParticles(float deltaT);
 
-    /// \brief Updates the particle velocity.
-    ///
-    /// \param newVelocity The new velocity for the particles.
+    /**
+     * \brief Actualizeaza viteza particulelor.
+     *
+     * \param newVelocity Noua viteza pentru particule.
+     */
     void updateParticleVelocity(float newVelocity);
 
-
-    /// \brief Toggles the lines for particles.
+    /**
+     * \brief Comuta afisarea liniilor pentru particule.
+     */
     void toggleLines();
 
-    /// \brief Starts the quadtree algorithm.
+    /**
+     * \brief Porneste algoritmul QuadTree.
+     */
     void startQuadTree();
 
-    /// \brief Starts the grid algorithm.
+    /**
+     * \brief Porneste algoritmul Grid.
+     */
     void startGrid();
 
-    /// \brief Starts the bounding volume hierarchy algorithm.
+    /**
+     * \brief Porneste algoritmul de ierarhie a volumelor marginale.
+     */
     void startBoundingVolume();
 
-    /// \brief Gets the screen width.
-    ///
-    /// \return The screen width.
+    /**
+     * \brief Obtine latimea ecranului.
+     *
+     * \return Latimea ecranului.
+     */
     int getScreenWidth();
 
-    /// \brief Gets the screen height.
-    ///
-    /// \return The screen height.
+    /**
+     * \brief Obtine inaltimea ecranului.
+     *
+     * \return Inaltimea ecranului.
+     */
     int getScreenHeight();
 
 private:
-    /// \brief Generates a particle.
+    /**
+     * \brief Genereaza o particula.
+     */
     void generateParticle();
 
-    /// \brief Draws the particles using the quadtree algorithm.
+    /**
+     * \brief Deseneaza particulele folosind algoritmul QuadTree.
+     */
     void drawWithQuadTree();
 
-    /// \brief Updates the particles using the quadtree algorithm.
-    ///
-    /// \param deltaT The time step for the update.
+    /**
+     * \brief Actualizeaza particulele folosind algoritmul QuadTree.
+     *
+     * \param deltaT Pasul de timp pentru actualizare.
+     */
     void updateWithQuadTree(float deltaT);
 
-    /// \brief Draws the particles using the bounding volume hierarchy algorithm.
+    /**
+     * \brief Deseneaza particulele folosind algoritmul de ierarhie a volumelor marginale.
+     */
     void drawWithBvh();
 
-    /// \brief Updates the particles using the bounding volume hierarchy algorithm.
-    ///
-    /// \param deltaT The time step for the update.
+    /**
+     * \brief Actualizeaza particulele folosind algoritmul de ierarhie a volumelor marginale.
+     *
+     * \param deltaT Pasul de timp pentru actualizare.
+     */
     void updateWithBvh(float deltaT);
 
-    /// \brief Draws the particles using the grid algorithm.
+    /**
+     * \brief Deseneaza particulele folosind algoritmul Grid.
+     */
     void drawWithGrid();
 
-    /// \brief Updates the particles using the grid algorithm.
-    ///
-    /// \param deltaT The time step for the update.
+    /**
+     * \brief Actualizeaza particulele folosind algoritmul Grid.
+     *
+     * \param deltaT Pasul de timp pentru actualizare.
+     */
     void updateWithGrid(float deltaT);
 
-    int screenWidth; ///< The width of the screen.
-    int screenHeight; ///< The height of the screen.
+    int screenWidth; ///< Latimea ecranului.
+    int screenHeight; ///< Inaltimea ecranului.
     int numberOfParticles = 0;
 
-    std::list<std::shared_ptr<ParticleInterface>> allParticles; ///< List of all particles.
-    std::map<int, std::shared_ptr<Particle>> particleMap; ///< Map of particles.
+    std::list<std::shared_ptr<ParticleInterface>> allParticles; ///< Lista de toate particulele.
+    std::map<int, std::shared_ptr<Particle>> particleMap; ///< Harta a particulelor.
 
-    StaticQuadTreeContainer<Particle> quadTreeParticles; ///< QuadTree container for particles.
-    std::unique_ptr<BvhContainer<Particle>> bvhContainer; ///< Bounding volume hierarchy container for particles.
-    std::unique_ptr<GridContainer<Particle>> gridContainer; ///< Grid container for particles.
+    StaticQuadTreeContainer<Particle> quadTreeParticles; ///< Container QuadTree pentru particule.
+    std::unique_ptr<BvhContainer<Particle>> bvhContainer; ///< Container de ierarhie a volumelor marginale pentru particule.
+    std::unique_ptr<GridContainer<Particle>> gridContainer; ///< Container Grid pentru particule.
     MeasurementCollector& measurementCollector;
 
-    std::random_device randomDevice; ///< Random device for particle generation.
-    std::mt19937 randomGenerator; ///< Random generator for particle generation.
+    std::random_device randomDevice; ///< Dispozitiv random pentru generarea particulelor.
+    std::mt19937 randomGenerator; ///< Generator random pentru generarea particulelor.
 
-    bool onOffLines; ///< Flag to toggle lines for particles.
-    Algo algoState; ///< Current algorithm state.
+    bool onOffLines; ///< Indicator pentru afisarea liniilor pentru particule.
+    Algo algoState; ///< Starea algoritmului curent.
 };
