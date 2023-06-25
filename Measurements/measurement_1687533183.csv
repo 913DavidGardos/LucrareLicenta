@@ -1,6 +1,0 @@
-Function Name, Number of Items, Execution time (miliseconds), Memory space (kilobytes)
-InitParticles100, 100, 3.6226, 0
-InitParticles1000, 1000, 25.0785, 0
-InitParticles10000, 10000, 503.945, 0
-updateWithGrid1000, 1000, 26.4877, 9.016
-updateWithGrid10000, 10000, 868.48, 90.016

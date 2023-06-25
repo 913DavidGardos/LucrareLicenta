@@ -1,8 +1,0 @@
-Function Name, Number of Items, Execution time (miliseconds), Memory space (kilobytes)
-InitParticles1, 1, 6.003, 0
-InitParticles100, 100, 3.7118, 0
-InitParticles4, 4, 5.3177, 0
-updateWithBvh100, 100, 0.9398, 7.608
-updateWithGrid100, 100, 2.2227, 0.916
-updateWithQuadTree1, 1, 0.0534, 0.577
-updateWithQuadTree100, 100, 2.3036, 17.764
